@@ -364,3 +364,38 @@
 
 </body>
 </html>
+<!-- Wybór rangi przez użytkownika -->
+<label for="rank-select">Pożądana ranga:</label>
+<select id="rank-select" onchange="updateRankImage()">
+  <option value="bronze">Bronze</option>
+  <option value="silver">Silver</option>
+  <option value="gold">Gold</option>
+  <!-- Dodaj pozostałe rangi... -->
+  <option value="unreal">Unreal</option>
+</select>
+
+<!-- Kontener na grafikę rangi o nowym położeniu -->
+<div class="rank-image-container">
+  <img id="rank-visual" src="images/bronze.png" alt="Ranga">
+</div>
+
+<script>
+// Słownik przypisujący wartość z listy do ścieżki pliku graficznego
+const rankImages = {
+  bronze: "images/bronze.png",
+  silver: "images/silver.png",
+  gold: "images/gold.png",
+  unreal: "images/unreal.png" // Ścieżka do Twojej grafiki Unreal
+};
+
+function updateRankImage() {
+  const selectElement = document.getElementById("rank-select");
+  const imgElement = document.getElementById("rank-visual");
+  const selectedRank = selectElement.value;
+
+  // Zmiana źródła obrazka w zależności od wybranej rangi
+  if (rankImages[selectedRank]) {
+    imgElement.src = rankImages[selectedRank];
+  }
+}
+</script>

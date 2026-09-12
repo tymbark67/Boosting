@@ -39,9 +39,13 @@
       flex: 1;
       background: #000000;
       border-radius: 20px;
-      padding: 25px;
+      padding: 30px;
       border: 1px solid #222222;
       box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
     }
 
     /* Układ kafelków z rangami */
@@ -117,35 +121,28 @@
       letter-spacing: 1.5px;
       color: #888888;
       text-transform: uppercase;
+      width: 100%;
     }
 
-    .mode-toggle {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 25px;
-    }
-
-    .mode-toggle button {
-      flex: 1;
-      padding: 10px;
-      background: #111;
-      border: 1px solid #333;
+    .mode-badge {
+      width: 100%;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       color: #fff;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-
-    .mode-toggle button.active {
-      background: #ffffff;
-      color: #000000;
-      border-color: #ffffff;
+      border-radius: 10px;
       font-weight: bold;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 25px;
+      box-sizing: border-box;
     }
 
     .price-box {
-      font-size: 32px;
+      font-size: 34px;
       font-weight: bold;
-      margin-bottom: 20px;
+      margin-bottom: 25px;
+      color: #ffffff;
     }
 
     .price-box span {
@@ -153,23 +150,25 @@
       color: #888;
       display: block;
       font-weight: normal;
+      margin-top: 5px;
     }
 
     .submit-btn {
       width: 100%;
-      padding: 15px;
+      padding: 16px;
       background: #ffffff;
       color: #000000;
       border: none;
-      border-radius: 10px;
+      border-radius: 12px;
       font-size: 16px;
       font-weight: bold;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: background 0.2s, transform 0.1s;
     }
 
     .submit-btn:hover {
       background: #eeeeee;
+      transform: translateY(-1px);
     }
 
     /* Sekcja zaufania na dole strony */
@@ -251,14 +250,14 @@
       <div class="order-panel">
         <h4>Dostosuj zamówienie</h4>
         
-        <!-- Miejsce dedykowane na dużą grafikę aktualnie wybranej rangi (Unreal/Silver/Bronze) -->
-        <div id="big-rank-display-box" style="text-align: center; margin-bottom: 25px; padding: 15px; background: rgba(255,255,255,0.02); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
-          <img id="main-rank-view" src="unreal.png" alt="Grafika Rangi" style="max-width: 140px; height: auto; filter: drop-shadow(0 0 20px rgba(255,71,87,0.4)); transition: transform 0.2s ease, filter 0.2s ease;">
+        <!-- Miejsce dedykowane na dużą grafikę aktualnie wybranej rangi (Automatyczne linki) -->
+        <div id="big-rank-display-box" style="width: 100%; display: flex; justify-content: center; align-items: center; margin-bottom: 25px; padding: 20px; background: rgba(255,255,255,0.01); border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); box-sizing: border-box;">
+          <img id="main-rank-view" src="https://fortnite-api.com" alt="Grafika Rangi" style="max-width: 130px; height: auto; filter: drop-shadow(0 0 25px rgba(168, 85, 247, 0.5)); transition: all 0.3s ease;">
         </div>
 
-        <div class="mode-toggle">
-          <button class="active">Solo</button>
-          <button>Duo</button>
+        <!-- Usunięto opcję wyboru Duo - stały tryb Solo -->
+        <div class="mode-badge">
+          Tryb: Solo
         </div>
 
         <div class="price-box">
@@ -290,14 +289,13 @@
 
   <!-- Sekcja logiki skryptowej sterującej zmianami rang -->
   <script>
-    // Baza danych o rangach, przypisująca nazwy oraz pliki graficzne
+    // Linki zewnętrzne do oficjalnych ikon Fortnite API, żeby grafiki od razu działały!
     const RANK_DATA = {
-      1: { name: "Bronze", img: "bronze.png" },
-      2: { name: "Silver", img: "silver.png" },
-      3: { name: "Unreal", img: "unreal.png" }
+      1: { name: "Bronze", img: "https://fortnite-api.com", shadow: "rgba(205, 127, 50, 0.4)" },
+      2: { name: "Silver", img: "https://fortnite-api.com", shadow: "rgba(192, 192, 192, 0.4)" },
+      3: { name: "Unreal", img: "https://fortnite-api.com", shadow: "rgba(168, 85, 247, 0.5)" }
     };
 
-    // Funkcja wywoływana, gdy użytkownik zmienia rangę bezpośrednio z listy rozwijanej
     function updateRankFromDropdown() {
       const select = document.getElementById("target-rank-select");
       const slider = document.getElementById("rank-slider");
@@ -307,15 +305,14 @@
 
       targetText.innerText = selectedName;
 
-      // Zsynchronizuj pozycję suwaka z wybraną z listy rangą
       const entry = Object.entries(RANK_DATA).find(([_, value]) => value.name === selectedName);
       if (entry) {
         slider.value = entry[0];
         img.src = entry[1].img;
+        img.style.filter = `drop-shadow(0 0 25px ${entry[1].shadow})`;
       }
     }
 
-    // Funkcja wywoływana, gdy użytkownik przesuwa suwak na środku strony
     function updateRankFromSlider(value) {
       const select = document.getElementById("target-rank-select");
       const img = document.getElementById("main-rank-view");
@@ -325,6 +322,7 @@
         select.value = RANK_DATA[value].name;
         targetText.innerText = RANK_DATA[value].name;
         img.src = RANK_DATA[value].img;
+        img.style.filter = `drop-shadow(0 0 25px ${RANK_DATA[value].shadow})`;
       }
     }
   </script>

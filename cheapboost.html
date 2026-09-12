@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CheapBoost — Boosting Fortnite</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFFFFF;
+    --panel:#F5F5F5;
+    --panel-2:#ECECEC;
+    --panel-3:#E1E1E1;
+    --ink:#111111;
+    --text:#141414;
+    --muted:#6b6b6b;
+    --line:rgba(0,0,0,0.10);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Manrope',sans-serif;
+    line-height:1.6;
+    overflow-x:hidden;
+  }
+  h1,h2,h3,h4,.display{
+    font-family:'Rajdhani',sans-serif;
+    font-weight:700;
+    letter-spacing:0.01em;
+    line-height:1.05;
+    margin:0;
+  }
+  a{color:inherit;text-decoration:none;}
+  .wrap{max-width:1200px;margin:0 auto;padding:0 32px;}
+  section{position:relative;}
+
+  /* ---------- NAV (zawsze czarny pasek) ---------- */
+  header{
+    position:sticky;top:0;z-index:50;
+    background:#0A0A0A;
+    border-bottom:1px solid rgba(255,255,255,0.08);
+  }
+  nav.wrap{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 32px;
+  }
+  .logo{
+    font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1.5rem;
+    display:flex;align-items:center;gap:10px;color:#fff;
+  }
+  .logo .mark{
+    width:14px;height:14px;background:#fff;
+    clip-path:polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+    display:inline-block;
+  }
+  .nav-cta{
+    padding:10px 22px;
+    background:#fff;
+    color:#0A0A0A;
+    font-weight:700;
+    font-size:0.92rem;
+    clip-path:polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+  }
+
+  /* ---------- ORDER HERO ---------- */
+  .order-hero{padding:56px 0 100px;}
+  .order-top{
+    display:flex;justify-content:space-between;align-items:flex-end;
+    gap:24px;flex-wrap:wrap;margin-bottom:30px;
+  }
+  .order-top h1{
+    font-size:clamp(1.6rem,2.6vw,2.2rem);color:var(--text);max-width:640px;
+    font-family:'Manrope',sans-serif;font-weight:700;letter-spacing:0;
+  }
+  .order-top h1 b{color:var(--ink);text-decoration:underline;text-decoration-color:rgba(17,17,17,0.25);text-underline-offset:4px;}
+  .trust-pill{
+    display:flex;align-items:center;gap:12px;color:var(--muted);font-size:0.86rem;
+    white-space:nowrap;
+  }
+  .trust-pill .star{
+    width:38px;height:38px;flex:none;
+    background:var(--ink);border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-weight:700;font-size:0.78rem;
+    clip-path:polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+  }
+  .trust-pill b{color:var(--text);}
+
+  .cat-tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:34px;}
+  .cat-tab{
+    padding:10px 20px;border:1px solid var(--line);color:var(--muted);
+    font-size:0.9rem;font-weight:600;background:var(--panel);
+    clip-path:polygon(9px 0,100% 0,calc(100% - 9px) 100%,0 100%);
+    cursor:pointer;transition:color .15s ease,border-color .15s ease;
+  }
+  .cat-tab.active{color:#fff;background:var(--ink);border-color:transparent;}
+  .cat-tab:not(.active):hover{color:var(--text);border-color:rgba(0,0,0,0.28);}
+
+  .builder-grid{display:grid;grid-template-columns:1fr 1fr 0.8fr;gap:18px;}
+  .rank-pick{
+    padding:26px;border-radius:22px;position:relative;overflow:hidden;
+    background:var(--panel);border:1px solid var(--line);
+    isolation:isolate;
+  }
+  .rank-pick .art{
+    position:absolute;inset:-40%;z-index:-1;filter:blur(40px);opacity:0.16;
+    background:radial-gradient(circle at 30% 30%, var(--tint,#000), transparent 65%);
+  }
+  .rank-pick-head{display:flex;align-items:center;gap:18px;margin-bottom:28px;}
+  .rank-icon{
+    width:64px;height:64px;flex:none;position:relative;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 0 0 1px rgba(0,0,0,0.06), 0 14px 26px -10px rgba(0,0,0,0.25);
+    transition:box-shadow .2s ease;
+  }
+  .rank-icon.unreal-glow{box-shadow:0 0 0 1px rgba(0,0,0,0.06), 0 0 34px 4px rgba(0,0,0,0.28);}
+  .rank-icon .gem{width:26px;height:26px;}
+  .rank-pick-head .lbl{color:var(--muted);font-size:0.82rem;display:block;margin-bottom:4px;}
+  .rank-pick-head .val{color:var(--text);font-size:1.4rem;font-family:'Rajdhani',sans-serif;font-weight:700;}
+  .field{margin-bottom:18px;}
+  .field:last-child{margin-bottom:0;}
+  .field label{display:block;color:var(--muted);font-size:0.82rem;margin-bottom:9px;}
+  .select-wrap{position:relative;}
+  .select-wrap::after{
+    content:"";position:absolute;right:16px;top:50%;transform:translateY(-60%);
+    width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);
+    rotate:45deg;pointer-events:none;
+  }
+  select{
+    width:100%;padding:13px 14px;background:#fff;border-radius:12px;
+    border:1px solid var(--line);color:var(--text);font-family:'Manrope';font-size:0.96rem;
+    appearance:none;-webkit-appearance:none;
+  }
+
+  .order-panel{
+    padding:26px;border-radius:22px;
+    background:var(--ink);
+    border:1px solid var(--ink);
+    display:flex;flex-direction:column;
+  }
+  .order-panel .kicker{
+    color:rgba(255,255,255,0.6);font-weight:700;font-size:0.78rem;letter-spacing:0.06em;
+    margin-bottom:20px;display:block;
+  }
+  .mode-toggle{
+    display:flex;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:12px;
+    padding:4px;margin-bottom:24px;
+  }
+  .mode-toggle button{
+    flex:1;padding:10px;background:none;border:none;border-radius:9px;color:rgba(255,255,255,0.6);
+    font-family:'Manrope';font-weight:600;font-size:0.9rem;cursor:pointer;
+  }
+  .mode-toggle button.active{background:#fff;color:#111;}
+
+  .order-price{margin-top:auto;padding-top:8px;}
+  .order-price .amt{font-family:'Rajdhani',sans-serif;font-size:2.2rem;color:#fff;display:block;}
+  .order-price .time{color:rgba(255,255,255,0.55);font-size:0.85rem;}
+  .order-cta{
+    width:100%;margin-top:18px;padding:15px;border-radius:12px;
+    background:#fff;
+    color:#111111;font-weight:700;font-size:0.98rem;border:none;cursor:pointer;
+  }
+  .secure-note{text-align:center;color:rgba(255,255,255,0.45);font-size:0.78rem;margin-top:14px;}
+  .secure-note a{color:rgba(255,255,255,0.8);border-bottom:1px solid rgba(255,255,255,0.3);}
+
+  .below-grid{display:grid;grid-template-columns:2fr 1fr;gap:18px;margin-top:18px;}
+  .trust-box{background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:32px;}
+  .trust-box h3{color:var(--text);font-size:1.35rem;margin-bottom:8px;}
+  .trust-box>p{color:var(--muted);font-size:0.92rem;margin-bottom:22px;}
+  .trust-list{display:grid;grid-template-columns:1fr 1fr;gap:14px 30px;}
+  .trust-item{display:flex;gap:10px;align-items:flex-start;font-size:0.92rem;color:var(--text);}
+  .trust-item .chk{
+    width:18px;height:18px;flex:none;margin-top:2px;border-radius:6px;
+    background:var(--ink);border:1px solid var(--ink);
+    display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:#fff;
+  }
+  .promo-box{
+    border-radius:22px;border:1px solid var(--line);
+    background:var(--panel);
+    padding:32px;display:flex;flex-direction:column;justify-content:center;
+  }
+  .promo-box .tag{
+    display:inline-block;background:var(--ink);color:#fff;font-weight:700;border-radius:20px;
+    font-size:0.82rem;padding:3px 12px;margin-bottom:10px;width:fit-content;
+  }
+  .promo-box p{color:var(--muted);font-size:0.88rem;}
+  .promo-box strong{color:var(--text);}
+
+  @media(max-width:980px){
+    .builder-grid{grid-template-columns:1fr;}
+    .below-grid{grid-template-columns:1fr;}
+    .trust-list{grid-template-columns:1fr;}
+  }
+  @media(max-width:760px){.navlinks{display:none;}}
+
+  ::selection{background:var(--ink);color:#fff;}
+</style>
+</head>
+<body>
+
+<header>
+  <nav class="wrap">
+    <div class="logo"><span class="mark"></span>CheapBoost</div>
+    <a class="nav-cta" href="#zamow">Wyceń boost</a>
+  </nav>
+</header>
+
+<section class="order-hero" id="zamow">
+  <div class="wrap">
+    <div class="order-top">
+      <h1>Uzyskaj ofertę boostera w mniej niż <b>2 minuty</b></h1>
+      <div class="trust-pill">
+        <span class="star">98%</span>
+        <span>Pozytywne opinie z ostatnich<br><b>41 280</b> zamówień</span>
+      </div>
+    </div>
+
+    <div class="cat-tabs">
+      <div class="cat-tab active">Battle Royale Rank Boost</div>
+      <div class="cat-tab">Reload Rank Boost</div>
+    </div>
+
+    <div class="builder-grid">
+      <div class="rank-pick">
+        <div class="art" id="fromArt"></div>
+        <div class="rank-pick-head">
+          <div class="rank-icon" id="fromIcon"><svg class="gem" id="fromGem" viewBox="0 0 100 100"></svg></div>
+          <div><span class="lbl">Aktualna ranga</span><span class="val" id="fromLabel">Bronze I</span></div>
+        </div>
+        <div class="field">
+          <label>Aktualna ranga</label>
+          <div class="select-wrap"><select id="fromRank"></select></div>
+        </div>
+      </div>
+
+      <div class="rank-pick">
+        <div class="art" id="toArt"></div>
+        <div class="rank-pick-head">
+          <div class="rank-icon" id="toIcon"><svg class="gem" id="toGem" viewBox="0 0 100 100"></svg></div>
+          <div><span class="lbl">Pożądana ranga</span><span class="val" id="toLabel">Unreal</span></div>
+        </div>
+        <div class="field">
+          <label>Pożądana ranga</label>
+          <div class="select-wrap"><select id="toRank"></select></div>
+        </div>
+      </div>
+
+      <div class="order-panel">
+        <span class="kicker">DOSTOSUJ ZAMÓWIENIE</span>
+        <div class="mode-toggle">
+          <button class="active" id="soloBtn">Solo</button>
+          <button id="duoBtn">Duo</button>
+        </div>
+        <div class="order-price">
+          <span class="amt" id="priceOut">— zł</span>
+          <span class="time" id="timeOut">wybierz rangi</span>
+        </div>
+        <button class="order-cta">Zobacz oferty teraz</button>
+        <div class="secure-note">🔒 Chronione przez <a href="#">CheapShield</a></div>
+      </div>
+    </div>
+
+    <div class="below-grid">
+      <div class="trust-box">
+        <h3>Dlaczego warto zaufać CheapBoost?</h3>
+        <p>Usługa boostingu jest nadzorowana i zabezpieczona od pierwszego logowania do ostatniego meczu.</p>
+        <div class="trust-list">
+          <div class="trust-item"><span class="chk">✓</span>Zweryfikowani boosterzy z rangą Champion+</div>
+          <div class="trust-item"><span class="chk">✓</span>Start realizacji w mniej niż 24h</div>
+          <div class="trust-item"><span class="chk">✓</span>Wsparcie na Discordzie 24/7</div>
+          <div class="trust-item"><span class="chk">✓</span>Bezpieczne i natychmiastowe płatności</div>
+          <div class="trust-item"><span class="chk">✓</span>Gwarancja rangi bez dopłat</div>
+          <div class="trust-item"><span class="chk">✓</span>Zrzuty ekranu po każdej sesji</div>
+        </div>
+      </div>
+      <div class="promo-box">
+        <span class="tag">−40%</span>
+        <p><strong>Zaoszczędź nawet 40% na boostingu.</strong><br>Kilkudziesięciu boosterów rywalizuje o Twoje zlecenie, dzięki czemu ceny zostają niskie.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  // każda ranga ma własny kształt odznaki (SVG path) + odcień szarości
+  const ranks = [
+    {name:"Bronze",   color:"#8a8a8a", path:"M50 8 A42 42 0 1 1 49.9 8 Z M50 26 A24 24 0 1 0 50.1 26 Z"},
+    {name:"Silver",   color:"#7a7a7a", path:"M50 5 L91 27 L91 73 L50 95 L9 73 L9 27 Z"},
+    {name:"Gold",     color:"#666666", path:"M50 4 L95 37 L77 92 L23 92 L5 37 Z"},
+    {name:"Platinum", color:"#4d4d4d", path:"M50 4 L96 50 L50 96 L4 50 Z"},
+    {name:"Diamond",  color:"#333333", path:"M50 4 L80 32 L66 96 L34 96 L20 32 Z"},
+    {name:"Elite",    color:"#1c1c1c", path:"M50 3 L61 36 L96 36 L67 57 L78 91 L50 70 L22 91 L33 57 L4 36 L39 36 Z"},
+    {name:"Champion", color:"#0e0e0e", path:"M50 4 L92 16 L92 50 C92 76 74 92 50 98 C26 92 8 76 8 50 L8 16 Z"},
+    {name:"Unreal",   color:"#000000", path:"M50 2 L61 33 L92 20 L70 46 L98 50 L70 54 L92 80 L61 67 L50 98 L39 67 L8 80 L30 54 L2 50 L30 46 L8 20 L39 33 Z"},
+  ];
+  const stepCost  = [0, 30, 40, 65, 95, 145, 230, 340];
+  const stepHours = [0, 4, 6, 10, 16, 24, 40, 60];
+
+  const fromSel = document.getElementById('fromRank');
+  const toSel = document.getElementById('toRank');
+  ranks.forEach((r,i)=>{
+    fromSel.innerHTML += `<option value="${i}">${r.name}</option>`;
+    toSel.innerHTML   += `<option value="${i}">${r.name}</option>`;
+  });
+  fromSel.value = 0;
+  toSel.value = 7;
+
+  const fromIcon = document.getElementById('fromIcon');
+  const toIcon   = document.getElementById('toIcon');
+  const fromGem  = document.getElementById('fromGem');
+  const toGem    = document.getElementById('toGem');
+  const fromArt  = document.getElementById('fromArt');
+  const toArt    = document.getElementById('toArt');
+  const fromLabel = document.getElementById('fromLabel');
+  const toLabel   = document.getElementById('toLabel');
+  const priceOut = document.getElementById('priceOut');
+  const timeOut  = document.getElementById('timeOut');
+
+  let duo = false;
+  document.getElementById('soloBtn').onclick = ()=>{duo=false;setMode();calc();};
+  document.getElementById('duoBtn').onclick  = ()=>{duo=true;setMode();calc();};
+  function setMode(){
+    document.getElementById('soloBtn').classList.toggle('active',!duo);
+    document.getElementById('duoBtn').classList.toggle('active',duo);
+  }
+
+  function paintRank(idx, icon, gem, art, label){
+    const r = ranks[idx];
+    label.textContent = r.name;
+    icon.style.background = `radial-gradient(circle at 32% 28%, #ffffff, ${r.color} 78%)`;
+    icon.classList.toggle('unreal-glow', idx === ranks.length-1);
+    gem.innerHTML = `<path d="${r.path}" fill="${r.color}"></path>`;
+    art.style.setProperty('--tint', r.color);
+  }
+
+  function calc(){
+    const from = parseInt(fromSel.value);
+    const to = parseInt(toSel.value);
+    paintRank(from, fromIcon, fromGem, fromArt, fromLabel);
+    paintRank(to, toIcon, toGem, toArt, toLabel);
+
+    if(to <= from){
+      priceOut.textContent = '— zł';
+      timeOut.textContent = 'ranga docelowa musi być wyższa';
+      return;
+    }
+    let price = 0, hours = 0;
+    for(let i=from+1;i<=to;i++){ price += stepCost[i]; hours += stepHours[i]; }
+    if(duo) price = Math.round(price*0.85);
+
+    const days = hours/24;
+    timeOut.textContent = days >= 1 ? `${days.toFixed(1)} dnia realizacji` : `${hours}h realizacji`;
+    priceOut.textContent = price + ' zł';
+  }
+
+  [fromSel,toSel].forEach(s=>s.addEventListener('change',calc));
+  setMode();
+  calc();
+</script>
+
+</body>
+</html>

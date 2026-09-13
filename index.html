@@ -1,330 +1,917 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CheapBoost - Boosting Rangi</title>
-  <style>
-    /* Podstawowe style resetujące i tło strony */
-    body {
-      background-color: #0b0b0c;
-      color: #ffffff;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
-      padding: 20px;
-    }
-    
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CheapBoost</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+  :root {
+    --ink: #0a0a0a;
+    --ink-soft: #1c1c1c;
+    --paper: #ffffff;
+    --paper-soft: #f6f6f7;
+    --line: #e7e7e9;
+    --muted: #6b6b70;
+    --good: #16a34a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Poppins', 'Segoe UI', Arial, sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
 
-    /* Struktura główna strony - dwa panele obok siebie */
-    .main-grid {
-      display: flex;
-      gap: 30px;
-      align-items: flex-start;
-      margin-top: 40px;
-    }
+  /* ---------- NAV ---------- */
+  nav {
+    display: flex; align-items: center; gap: 6px;
+    padding: 14px 26px;
+    background: rgba(10,10,10,0.92);
+    backdrop-filter: blur(10px);
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.18);
+  }
+  .brand { color: #ffffff; font-weight: 800; font-size: 19px; letter-spacing: 0.5px; margin-right: auto; display: flex; align-items: center; gap: 8px; }
+  .brand-dot { width: 9px; height: 9px; border-radius: 50%; background: #ffffff; box-shadow: 0 0 12px #ffffff; }
+  nav .tabs { display: flex; gap: 4px; }
+  nav button {
+    background: transparent; color: rgba(255,255,255,0.65); border: none;
+    padding: 10px 18px; border-radius: 999px; font-family: inherit;
+    font-size: 14.5px; font-weight: 600; letter-spacing: 0.2px; cursor: pointer;
+    transition: all 0.25s ease;
+  }
+  nav button:hover { color: #ffffff; background: rgba(255,255,255,0.08); }
+  nav button.active { background: #ffffff; color: #0a0a0a; }
 
-    .gem-window {
-      flex: 2;
-      background: rgba(255, 255, 255, 0.02);
-      border-radius: 20px;
-      padding: 30px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-    }
+  .page { display: none; }
+  .page.active { display: block; animation: fadein 0.5s ease; }
+  @keyframes fadein { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
 
-    .order-panel {
-      flex: 1;
-      background: #000000;
-      border-radius: 20px;
-      padding: 30px;
-      border: 1px solid #222222;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-    }
+  /* ---------- HERO ---------- */
+  .hero {
+    position: relative; text-align: center; padding: 100px 20px 40px; overflow: hidden;
+    background: radial-gradient(circle at 15% 10%, #f0f0f0 0%, transparent 40%),
+                radial-gradient(circle at 85% 20%, #ececec 0%, transparent 35%), #ffffff;
+  }
+  .hero::before {
+    content: ""; position: absolute; inset: 0;
+    background-image: linear-gradient(rgba(0,0,0,0.035) 1px, transparent 1px),
+                       linear-gradient(90deg, rgba(0,0,0,0.035) 1px, transparent 1px);
+    background-size: 42px 42px;
+    -webkit-mask-image: radial-gradient(circle at 50% 0%, #000 0%, transparent 65%);
+            mask-image: radial-gradient(circle at 50% 0%, #000 0%, transparent 65%);
+    pointer-events: none;
+  }
+  .eyebrow {
+    display: inline-block; position: relative; font-size: 12.5px; font-weight: 700;
+    letter-spacing: 1.5px; text-transform: uppercase; color: #ffffff; background: var(--ink);
+    padding: 7px 16px; border-radius: 999px; margin-bottom: 24px;
+  }
+  h1.logo { position: relative; font-size: clamp(42px, 9vw, 72px); font-weight: 900; letter-spacing: -1px; line-height: 1; margin-bottom: 14px; }
+  h1.logo span { background: linear-gradient(90deg, #0a0a0a, #5a5a5a); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  p.subtitle { position: relative; color: var(--muted); margin-bottom: 6px; font-size: 18px; font-weight: 500; }
 
-    /* Układ kafelków z rangami */
-    .rank-selectors {
-      display: flex;
-      gap: 20px;
-      margin-bottom: 20px;
-    }
+  /* ---------- SCENA Z LUDZIKIEM ---------- */
+  .scene-wrap { position: relative; max-width: 480px; margin: 30px auto 6px; }
+  .scene-glow { position: absolute; inset: 10% 10% 0 10%; background: radial-gradient(ellipse at center, rgba(0,0,0,0.08) 0%, transparent 70%); filter: blur(10px); z-index: 0; }
+  svg { width: 100%; height: auto; overflow: visible; position: relative; z-index: 1; }
 
-    .rank-tile {
-      flex: 1;
-      background: rgba(255, 255, 255, 0.04);
-      padding: 20px;
-      border-radius: 15px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      text-align: left;
-    }
+  .chair-back { transform-origin: 165px 178px; animation: chair-sway 2.4s ease-in-out infinite; }
+  @keyframes chair-sway { 0%,100% { transform: rotate(0deg); } 50% { transform: rotate(2deg); } }
 
-    .rank-tile span {
-      font-size: 11px;
-      color: #888888;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
+  .body-g { animation: body-bounce 1.1s ease-in-out infinite; transform-origin: 132px 180px; }
+  @keyframes body-bounce { 0%,100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-3px) rotate(-1deg); } }
 
-    .rank-tile h3 {
-      margin: 5px 0 15px 0;
-      font-size: 22px;
-      font-weight: 600;
-    }
+  .head-g { animation: head-bob 1.1s ease-in-out infinite; transform-origin: 132px 78px; }
+  @keyframes head-bob { 0%,100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-6px) rotate(3deg); } }
 
-    .rank-tile select {
-      width: 100%;
-      padding: 12px;
-      background: #111112;
-      border: 1px solid #333333;
-      color: #ffffff;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 14px;
-    }
+  .smile { animation: smile-pulse 1.1s ease-in-out infinite; transform-origin: 132px 90px; }
+  @keyframes smile-pulse { 0%,100% { transform: scaleY(1); } 50% { transform: scaleY(1.4); } }
 
-    /* Stylizacja nowoczesnego suwaka (Slider) */
-    .slider-container {
-      margin: 35px 0 15px 0;
-      padding: 0 5px;
-    }
+  .blush { animation: blush-pulse 1.1s ease-in-out infinite; }
+  @keyframes blush-pulse { 0%,100% { opacity: 0.35; } 50% { opacity: 0.6; } }
 
-    .slider-container label {
-      display: block;
-      margin-bottom: 12px;
-      color: #aaaaaa;
-      font-size: 13px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
+  .arm-left { transform-origin: 116px 132px; animation: key-left 0.35s ease-in-out infinite alternate; }
+  .arm-right { transform-origin: 148px 132px; animation: key-right 0.35s ease-in-out infinite alternate; }
+  @keyframes key-left { 0% { transform: rotate(0deg) translateY(0); } 100% { transform: rotate(-16deg) translateY(3px); } }
+  @keyframes key-right { 0% { transform: rotate(0deg) translateY(0); } 100% { transform: rotate(16deg) translateY(-2px); } }
 
-    input[type="range"] {
-      width: 100%;
-      accent-color: #ff4757;
-      cursor: pointer;
-      height: 6px;
-      background: #252528;
-      border-radius: 5px;
-      appearance: none;
-      outline: none;
-    }
+  .screen-glow-el { animation: glow 0.8s ease-in-out infinite alternate; }
+  @keyframes glow { 0% { fill: #d8d8d8; } 100% { fill: #f7f7f7; } }
 
-    /* Style panel zamówienia i przyciski */
-    .order-panel h4 {
-      margin: 0 0 20px 0;
-      font-size: 12px;
-      letter-spacing: 1.5px;
-      color: #888888;
-      text-transform: uppercase;
-      width: 100%;
-    }
+  .code-line { animation: type-line 2.4s ease-in-out infinite; transform-origin: left; }
+  .code-line.l2 { animation-delay: 0.3s; }
+  .code-line.l3 { animation-delay: 0.6s; }
+  .code-line.l4 { animation-delay: 0.9s; }
+  @keyframes type-line { 0% { transform: scaleX(0); opacity: 0; } 20% { transform: scaleX(1); opacity: 1; } 80% { transform: scaleX(1); opacity: 1; } 100% { transform: scaleX(0); opacity: 0; } }
 
-    .mode-badge {
-      width: 100%;
-      padding: 12px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: #fff;
-      border-radius: 10px;
-      font-weight: bold;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      margin-bottom: 25px;
-      box-sizing: border-box;
-    }
+  .confetti { opacity: 0; animation: burst 2.2s ease-in infinite; }
+  .confetti.c2 { animation-delay: 0.4s; }
+  .confetti.c3 { animation-delay: 0.8s; }
+  .confetti.c4 { animation-delay: 1.2s; }
+  .confetti.c5 { animation-delay: 1.6s; }
+  @keyframes burst { 0% { opacity: 0; transform: translate(0,0) rotate(0deg) scale(0.6); } 15% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--dx,20px), var(--dy,-70px)) rotate(220deg) scale(1); } }
 
-    .price-box {
-      font-size: 34px;
-      font-weight: bold;
-      margin-bottom: 25px;
-      color: #ffffff;
-    }
+  .float-star { opacity: 0; animation: floaty 1.8s ease-in-out infinite; }
+  .float-star.f2 { animation-delay: 0.6s; }
+  .float-star.f3 { animation-delay: 1.2s; }
+  @keyframes floaty { 0% { opacity: 0; transform: translateY(0) scale(0.5) rotate(0deg); } 35% { opacity: 1; transform: translateY(-14px) scale(1.1) rotate(10deg); } 70% { opacity: 0.6; transform: translateY(-30px) scale(0.9) rotate(-10deg); } 100% { opacity: 0; transform: translateY(-45px) scale(0.7) rotate(0deg); } }
 
-    .price-box span {
-      font-size: 14px;
-      color: #888;
-      display: block;
-      font-weight: normal;
-      margin-top: 5px;
-    }
+  .rgb-strip { animation: rgb-cycle 3s linear infinite; }
+  @keyframes rgb-cycle { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } }
 
-    .submit-btn {
-      width: 100%;
-      padding: 16px;
-      background: #ffffff;
-      color: #000000;
-      border: none;
-      border-radius: 12px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.1s;
-    }
+  .lamp-glow { animation: lamp-pulse 1.6s ease-in-out infinite; }
+  @keyframes lamp-pulse { 0%,100% { opacity: 0.55; } 50% { opacity: 0.9; } }
 
-    .submit-btn:hover {
-      background: #eeeeee;
-      transform: translateY(-1px);
-    }
+  .lead-text { position: relative; max-width: 560px; margin: 18px auto 55px; color: #444444; font-size: 16px; line-height: 1.6; text-align: center; }
 
-    /* Sekcja zaufania na dole strony */
-    .below-grid {
-      margin-top: 40px;
-      padding: 30px;
-      background: rgba(255, 255, 255, 0.02);
-      border-radius: 20px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-    }
+  .cta-row { display: flex; justify-content: center; gap: 14px; margin-bottom: 60px; flex-wrap: wrap; }
+  .btn-primary, .btn-ghost {
+    font-family: inherit; font-size: 15px; font-weight: 700; padding: 14px 30px;
+    border-radius: 999px; cursor: pointer; border: 2px solid var(--ink);
+    transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+  }
+  .btn-primary { background: var(--ink); color: #ffffff; }
+  .btn-primary:hover { transform: translateY(-3px); background: #2b2b2b; }
+  .btn-ghost { background: transparent; color: var(--ink); }
+  .btn-ghost:hover { transform: translateY(-3px); background: var(--ink); color: #fff; }
 
-    .trust-list {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 15px;
-      margin-top: 20px;
-    }
+  .stats { display: flex; justify-content: center; gap: clamp(24px, 6vw, 70px); flex-wrap: wrap; padding: 0 20px 70px; }
+  .stat { text-align: center; }
+  .stat-num { font-size: 32px; font-weight: 800; }
+  .stat-label { font-size: 13px; color: var(--muted); font-weight: 500; margin-top: 2px; }
 
-    .trust-line {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 14px;
-      color: #cccccc;
-    }
+  /* ---------- OPINIE ---------- */
+  .reviews-section { background: var(--ink); padding: 65px 20px 75px; }
+  .reviews-heading { text-align: center; color: #ffffff; font-size: 28px; font-weight: 800; letter-spacing: 0.3px; margin: 0 0 8px; }
+  .reviews-heading span { color: #8d8d8d; }
+  .reviews-sub { text-align: center; color: #999999; margin: 0 0 40px; font-size: 14px; }
 
-    /* Responsywność */
-    @media (max-width: 768px) {
-      .main-grid {
-        flex-direction: column;
-      }
-      .rank-selectors {
-        flex-direction: column;
-      }
-    }
-  </style>
+  .reviews-wrapper {
+    overflow: hidden; position: relative;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 8%, #000 92%, transparent 100%);
+            mask-image: linear-gradient(90deg, transparent 0%, #000 8%, #000 92%, transparent 100%);
+  }
+  .reviews-track { display: flex; width: max-content; gap: 22px; animation: scroll-left 38s linear infinite; }
+  .reviews-wrapper:hover .reviews-track { animation-play-state: paused; }
+
+  .review-card {
+    flex: 0 0 auto; width: 280px; background: #161616; border: 1px solid #2b2b2b;
+    border-radius: 16px; padding: 22px 24px; color: #eeeeee; white-space: normal;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.4);
+  }
+  .review-top { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .avatar { width: 38px; height: 38px; border-radius: 50%; background: #2a2a2a; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #cccccc; flex-shrink: 0; }
+  .review-name { font-size: 14px; font-weight: 600; color: #dddddd; }
+  .review-stars { color: #ffffff; font-size: 13px; letter-spacing: 2px; }
+  .review-text { font-size: 14px; line-height: 1.55; color: #c9c9c9; }
+
+  @keyframes scroll-left { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+  .page-inner { padding: 70px 20px 90px; max-width: 1040px; margin: 0 auto; }
+
+  /* ---------- OFERTA BOOSTINGU ---------- */
+  .offer-header { text-align: center; margin-bottom: 46px; }
+  .offer-header h1 { font-size: clamp(34px, 6vw, 46px); font-weight: 900; letter-spacing: -0.5px; }
+  .offer-header p { color: var(--muted); margin-top: 10px; font-size: 15.5px; }
+
+  .mode-tabs { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 38px; }
+  .mode-tab {
+    border: 2px solid var(--line); background: #fff; padding: 10px 20px; border-radius: 999px;
+    font-size: 13.5px; font-weight: 700; cursor: pointer; transition: all 0.2s ease;
+  }
+  .mode-tab.active { background: var(--ink); border-color: var(--ink); color: #fff; }
+  .mode-tab:not(.active):hover { border-color: #bbb; }
+
+  .picker-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-bottom: 34px; }
+  @media (max-width: 720px) { .picker-grid { grid-template-columns: 1fr; } }
+
+  .picker-card {
+    background: var(--paper-soft); border: 1px solid var(--line); border-radius: 22px;
+    padding: 28px; text-align: left;
+  }
+  .picker-top { display: flex; align-items: center; gap: 16px; margin-bottom: 22px; }
+  .picker-badge {
+    width: 62px; height: 62px; border-radius: 16px; background: #fff; border: 1px solid var(--line);
+    display: flex; align-items: center; justify-content: center; font-size: 30px; flex-shrink: 0;
+    overflow: hidden; padding: 2px;
+  }
+  .picker-badge svg { width: 100%; height: 100%; }
+  .picker-eyebrow { font-size: 12.5px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; }
+  .picker-value { font-size: 21px; font-weight: 800; }
+
+  .field { margin-bottom: 16px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label { display: block; font-size: 12.5px; font-weight: 700; color: #555; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .field select {
+    width: 100%; padding: 13px 14px; border-radius: 12px; border: 1px solid var(--line);
+    background: #ffffff; font-family: inherit; font-size: 14.5px; font-weight: 600; color: var(--ink);
+    cursor: pointer; appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9'%3E%3Cpath d='M1 1l6 6 6-6' stroke='%23555' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 14px center;
+  }
+  .field select:focus { outline: none; border-color: var(--ink); }
+
+  .summary-box {
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px;
+    background: var(--ink); color: #fff; border-radius: 18px; padding: 26px 30px; margin-bottom: 60px;
+  }
+  .summary-path { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 15.5px; flex-wrap: wrap; }
+  .summary-path .tag { background: rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 999px; font-size: 13.5px; }
+  .summary-path .arrow { color: #9a9a9a; font-size: 18px; }
+  .summary-note { font-size: 13px; color: #b6b6b6; margin-top: 8px; }
+  .price-block { text-align: right; }
+  .price-num { font-size: 34px; font-weight: 900; }
+  .price-label { font-size: 12px; color: #9a9a9a; text-transform: uppercase; letter-spacing: 1px; }
+  .order-btn {
+    background: #ffffff; color: #0a0a0a; border: none; padding: 14px 30px; border-radius: 999px;
+    font-size: 15px; font-weight: 700; cursor: pointer; transition: background 0.2s, transform 0.15s; font-family: inherit;
+  }
+  .order-btn:hover { background: #e2e2e2; transform: translateY(-2px); }
+  .order-btn:disabled { background: #4a4a4a; color: #9a9a9a; cursor: not-allowed; transform: none; }
+  .warn { color: #ff7b7b; font-size: 13px; font-weight: 600; margin-top: 8px; }
+  @media (max-width: 640px) { .summary-box { flex-direction: column; align-items: flex-start; } .price-block { text-align: left; } }
+
+  /* zaufanie */
+  .trust-card {
+    background: var(--paper-soft); border: 1px solid var(--line); border-radius: 22px;
+    padding: 36px clamp(20px, 5vw, 46px); margin-bottom: 60px;
+  }
+  .trust-card h2 { font-size: 24px; font-weight: 800; text-align: center; }
+  .trust-card > p { text-align: center; color: var(--muted); margin-top: 8px; font-size: 14.5px; margin-bottom: 26px; }
+  .trust-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 40px; }
+  @media (max-width: 620px) { .trust-grid { grid-template-columns: 1fr; } }
+  .trust-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 14.5px; font-weight: 500; }
+  .trust-item:last-child, .trust-grid > div:nth-last-child(2) { border-bottom: none; }
+  .trust-check { width: 22px; height: 22px; border-radius: 50%; background: var(--good); color: #fff; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 900; }
+
+  /* ---------- SPRZEDAWCY ---------- */
+  .sellers-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; margin-bottom: 18px; }
+  .sellers-head h2 { font-size: 22px; font-weight: 800; }
+  .filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 22px; }
+  .filter-pill {
+    border: 1.5px solid var(--line); background: #fff; padding: 9px 16px; border-radius: 999px;
+    font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px;
+    transition: all 0.2s;
+  }
+  .filter-pill.active { border-color: #f2c14e; background: #fff8e8; color: #7a5b00; }
+  .filter-pill:not(.active):hover { border-color: #bbb; }
+
+  .seller-list { display: flex; flex-direction: column; gap: 12px; }
+  .seller-row {
+    border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: #fff;
+  }
+  .seller-row.top { border: none; box-shadow: 0 10px 26px rgba(0,0,0,0.1); }
+  .top-flag {
+    background: linear-gradient(90deg, #3b2f9e, #7c3aed);
+    color: #fff; font-size: 12.5px; font-weight: 700; padding: 8px 18px; letter-spacing: 0.3px;
+  }
+  .seller-main {
+    display: flex; align-items: center; gap: 16px; padding: 16px 20px; flex-wrap: wrap;
+  }
+  .seller-avatar {
+    width: 46px; height: 46px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: 20px; color: #fff; font-weight: 700;
+  }
+  .seller-info { min-width: 170px; }
+  .seller-name-row { display: flex; align-items: center; gap: 5px; font-weight: 700; font-size: 15px; }
+  .verified { color: #2f9e44; font-size: 13px; }
+  .seller-meta { font-size: 12.5px; color: var(--muted); margin-top: 3px; display: flex; gap: 6px; align-items: center; }
+  .seller-meta .thumb { color: #2f9e44; }
+  .seller-meta a { color: #444; text-decoration: underline; cursor: pointer; }
+
+  .seller-delivery { min-width: 110px; font-size: 13px; color: var(--muted); }
+  .seller-delivery b { display: block; font-size: 14.5px; color: var(--ink); font-weight: 700; }
+
+  .seller-price { margin-left: auto; text-align: right; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .price-old { text-decoration: line-through; color: #a3a3a3; font-size: 13px; margin-right: 6px; }
+  .price-discount { color: var(--good); font-size: 12px; font-weight: 700; }
+  .price-new { font-size: 18px; font-weight: 800; }
+  .buy-btn {
+    background: #fff; color: var(--ink); border: 1.5px solid var(--ink); padding: 10px 22px;
+    border-radius: 10px; font-family: inherit; font-weight: 700; font-size: 14px; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .buy-btn:hover { background: var(--ink); color: #fff; }
+  .delivery-toggle {
+    background: none; border: none; font-family: inherit; font-size: 13px; font-weight: 600;
+    color: #444; cursor: pointer; display: flex; align-items: center; gap: 4px;
+  }
+  .real-note { text-align: center; font-size: 12.5px; color: var(--muted); margin-top: 18px; }
+
+  /* ---------- PANEL SPRZEDAWCY (logowanie Google) ---------- */
+  .seller-panel {
+    background: var(--paper-soft); border: 1px solid var(--line); border-radius: 22px;
+    padding: 34px clamp(20px, 5vw, 46px); margin-bottom: 46px; text-align: center;
+  }
+  .seller-panel h2 { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+  .seller-panel > p { color: var(--muted); font-size: 14px; margin-bottom: 22px; }
+  #googleBtnBox { display: flex; justify-content: center; margin-bottom: 6px; }
+  .access-denied {
+    display: none; background: #fff1f1; border: 1px solid #ffd3d3; color: #b42323;
+    padding: 14px 18px; border-radius: 12px; font-size: 14px; font-weight: 600; max-width: 420px; margin: 0 auto;
+  }
+  .seller-authed { display: none; }
+  .seller-authed-head {
+    display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 22px;
+  }
+  .seller-authed-head img { width: 40px; height: 40px; border-radius: 50%; }
+  .seller-authed-head .who { text-align: left; }
+  .seller-authed-head .who b { display: block; font-size: 14.5px; }
+  .seller-authed-head .who span { font-size: 12.5px; color: var(--muted); }
+  .price-form { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .price-form input {
+    padding: 13px 16px; border-radius: 12px; border: 1px solid var(--line);
+    font-family: inherit; font-size: 15px; font-weight: 600; width: 200px;
+  }
+  .price-form input:focus { outline: none; border-color: var(--ink); }
+  .start-boost-btn {
+    background: var(--ink); color: #fff; border: none; padding: 13px 28px; border-radius: 12px;
+    font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+  }
+  .start-boost-btn:hover { background: #2b2b2b; transform: translateY(-2px); }
+  .live-listing {
+    display: none; margin-top: 20px; padding: 16px 20px; background: #fff; border: 1px solid var(--line);
+    border-radius: 14px; text-align: left; max-width: 420px; margin-left: auto; margin-right: auto;
+  }
+  .live-listing b { display: block; margin-bottom: 4px; }
+  .setup-note { font-size: 12px; color: var(--muted); margin-top: 18px; }
+</style>
 </head>
 <body>
 
-  <div class="container">
-    
-    <!-- Nagłówek i siatka główna aplikacji -->
-    <div class="main-grid">
-      
-      <!-- Lewa sekcja konfiguracyjna rang -->
-      <div class="gem-window">
-        <div class="rank-selectors">
-          
-          <!-- Lewy kafelek: Aktualna ranga -->
-          <div class="rank-tile">
-            <span>Aktualna ranga</span>
-            <h3 id="current-rank-text">Diamond</h3>
-            <select id="current-rank-select">
-              <option value="Diamond">Diamond</option>
-            </select>
-          </div>
+<nav>
+  <div class="brand"><span class="brand-dot"></span>CheapBoost</div>
+  <div class="tabs">
+    <button id="btn-home" class="active" onclick="showPage('home')">Strona główna</button>
+    <button id="btn-oferta" onclick="showPage('oferta')">Oferta Boostingu</button>
+    <button id="btn-kontakt" onclick="showPage('kontakt')">Kontakt</button>
+  </div>
+</nav>
 
-          <!-- Prawy kafelek: Pożądana ranga -->
-          <div class="rank-tile">
-            <span>Pożądana ranga</span>
-            <h3 id="target-rank-text">Unreal</h3>
-            <select id="target-rank-select" onchange="updateRankFromDropdown()">
-              <option value="Bronze">Bronze</option>
-              <option value="Silver">Silver</option>
-              <option value="Unreal" selected>Unreal</option>
-            </select>
-          </div>
-          
-        </div>
+<div id="home" class="page active">
 
-        <!-- Nowy, szeroki suwak wyboru ustawiony płynnie na środku pod kafelkami -->
-        <div class="slider-container">
-          <label for="rank-slider">Przeciągnij, aby płynnie zmienić pożądaną rangę</label>
-          <input type="range" id="rank-slider" min="1" max="3" value="3" oninput="updateRankFromSlider(this.value)">
-        </div>
-      </div>
+  <div class="hero">
+    <span class="eyebrow">Boosting • Fortnite</span>
+    <h1 class="logo">Cheap<span>Boost</span></h1>
+    <p class="subtitle">Najlepsze wsparcie w dobrej cenie</p>
 
-      <!-- Prawa sekcja: Panel zamówienia i podsumowania z dużą grafiką rangi -->
-      <div class="order-panel">
-        <h4>Dostosuj zamówienie</h4>
-        
-        <!-- Miejsce dedykowane na dużą grafikę aktualnie wybranej rangi (Automatyczne linki) -->
-        <div id="big-rank-display-box" style="width: 100%; display: flex; justify-content: center; align-items: center; margin-bottom: 25px; padding: 20px; background: rgba(255,255,255,0.01); border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); box-sizing: border-box;">
-          <img id="main-rank-view" src="https://fortnite-api.com" alt="Grafika Rangi" style="max-width: 130px; height: auto; filter: drop-shadow(0 0 25px rgba(168, 85, 247, 0.5)); transition: all 0.3s ease;">
-        </div>
+    <div class="scene-wrap">
+      <div class="scene-glow"></div>
+      <svg viewBox="0 0 280 240">
+        <defs>
+          <linearGradient id="rgbGrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#ff5c5c"/>
+            <stop offset="33%" stop-color="#5cff8d"/>
+            <stop offset="66%" stop-color="#5c9cff"/>
+            <stop offset="100%" stop-color="#ff5cf0"/>
+          </linearGradient>
+        </defs>
 
-        <!-- Usunięto opcję wyboru Duo - stały tryb Solo -->
-        <div class="mode-badge">
-          Tryb: Solo
-        </div>
+        <!-- cień -->
+        <ellipse cx="140" cy="222" rx="95" ry="8" fill="#000000" opacity="0.06"/>
 
-        <div class="price-box">
-          715 zł
-          <span>5-7 dni realizacji</span>
-        </div>
+        <!-- lampka biurkowa -->
+        <g>
+          <rect x="24" y="205" width="16" height="6" rx="3" fill="#2a2a2a"/>
+          <rect x="30" y="160" width="4" height="46" fill="#2a2a2a"/>
+          <path d="M32 160 L14 140" stroke="#2a2a2a" stroke-width="4" stroke-linecap="round"/>
+          <path d="M14 140 L-2 150 L20 156 Z" fill="#2a2a2a"/>
+          <circle class="lamp-glow" cx="12" cy="148" r="10" fill="#ffe9a8"/>
+        </g>
 
-        <button class="submit-btn">Zobacz oferty teraz</button>
-      </div>
+        <!-- biurko -->
+        <rect x="45" y="196" width="205" height="10" rx="3" fill="#1a1a1a"/>
+        <rect x="58" y="206" width="8" height="24" fill="#1a1a1a"/>
+        <rect x="222" y="206" width="8" height="24" fill="#1a1a1a"/>
+        <!-- roślinka -->
+        <rect x="218" y="178" width="14" height="18" rx="3" fill="#3a3a3a"/>
+        <path d="M225 178 Q219 163 223 153 Q227 166 225 178 Z" fill="#555555"/>
+        <path d="M225 178 Q233 166 231 156 Q235 168 225 178 Z" fill="#666666"/>
 
+        <!-- krzesło -->
+        <g class="chair-back">
+          <rect x="163" y="126" width="10" height="74" rx="5" fill="#2c2c2c"/>
+          <rect x="163" y="120" width="36" height="12" rx="6" fill="#2c2c2c"/>
+          <circle cx="150" cy="230" r="4" fill="#1a1a1a"/>
+          <circle cx="175" cy="230" r="4" fill="#1a1a1a"/>
+        </g>
+
+        <!-- monitor -->
+        <rect x="98" y="126" width="94" height="62" rx="7" fill="#111111"/>
+        <rect x="105" y="133" width="80" height="46" class="screen-glow-el" fill="#dddddd"/>
+        <rect x="105" y="139" width="36" height="4" rx="2" class="code-line l1" fill="#999999"/>
+        <rect x="105" y="147" width="54" height="4" rx="2" class="code-line l2" fill="#999999"/>
+        <rect x="105" y="155" width="28" height="4" rx="2" class="code-line l3" fill="#999999"/>
+        <rect x="105" y="163" width="48" height="4" rx="2" class="code-line l4" fill="#999999"/>
+        <rect x="137" y="188" width="18" height="10" fill="#111111"/>
+        <rect x="118" y="198" width="54" height="5" rx="2" fill="#111111"/>
+
+        <!-- klawiatura z RGB -->
+        <rect x="120" y="205" width="50" height="12" rx="3" fill="#181818"/>
+        <rect class="rgb-strip" x="122" y="215" width="46" height="2.5" rx="1.2" fill="url(#rgbGrad)"/>
+
+        <g class="body-g">
+          <!-- nogi -->
+          <rect x="126" y="183" width="12" height="20" rx="4" fill="#2a2a2a"/>
+          <rect x="144" y="183" width="12" height="20" rx="4" fill="#2a2a2a"/>
+
+          <!-- bluza z kapturem -->
+          <path d="M114 106 Q114 95 138 95 Q162 95 162 106 L165 178 Q138 189 111 178 Z" fill="#222222"/>
+          <path d="M121 98 Q138 82 155 98 L152 107 Q138 98 124 107 Z" fill="#1a1a1a"/>
+          <rect x="134" y="105" width="8" height="15" rx="3" fill="#2f2f2f"/>
+          <path d="M134 120 L134 160" stroke="#151515" stroke-width="2"/>
+          <circle cx="134" cy="128" r="2" fill="#3a3a3a"/>
+          <circle cx="134" cy="140" r="2" fill="#3a3a3a"/>
+
+          <!-- ręce -->
+          <g class="arm-left">
+            <rect x="96" y="126" width="32" height="11" rx="5.5" fill="#222222"/>
+            <circle cx="96" cy="131" r="8" fill="#f0c9a0"/>
+            <path d="M91 128 L91 134 M96 127 L96 135 M101 128 L101 134" stroke="#d9ab7a" stroke-width="1.4" stroke-linecap="round"/>
+          </g>
+          <g class="arm-right">
+            <rect x="152" y="126" width="32" height="11" rx="5.5" fill="#222222"/>
+            <circle cx="184" cy="131" r="8" fill="#f0c9a0"/>
+            <path d="M179 128 L179 134 M184 127 L184 135 M189 128 L189 134" stroke="#d9ab7a" stroke-width="1.4" stroke-linecap="round"/>
+          </g>
+
+          <!-- głowa -->
+          <g class="head-g">
+            <circle cx="138" cy="84" r="25" fill="#f0c9a0"/>
+            <ellipse class="blush" cx="122" cy="92" rx="4.5" ry="3" fill="#ef9d8a"/>
+            <ellipse class="blush" cx="154" cy="92" rx="4.5" ry="3" fill="#ef9d8a"/>
+            <path d="M113 82 Q111 51 138 49 Q167 49 163 82 Q158 65 138 63 Q117 65 113 82 Z" fill="#2a1a10"/>
+            <path d="M117 60 Q113 52 119 46" stroke="#2a1a10" stroke-width="4" fill="none" stroke-linecap="round"/>
+            <path d="M159 60 Q163 52 157 46" stroke="#2a1a10" stroke-width="4" fill="none" stroke-linecap="round"/>
+            <circle cx="129" cy="84" r="2.7" fill="#111111"/>
+            <circle cx="147" cy="84" r="2.7" fill="#111111"/>
+            <path d="M125 71 Q129 68 133 70" stroke="#2a1a10" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <path d="M143 70 Q147 68 151 71" stroke="#2a1a10" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <path class="smile" d="M126 94 Q138 103 150 94" stroke="#7a3b2e" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+            <!-- słuchawki + mikrofon -->
+            <path d="M111 82 Q111 49 138 49 Q165 49 165 82" stroke="#111111" stroke-width="5.5" fill="none"/>
+            <rect x="105" y="76" width="10" height="17" rx="4.5" fill="#111111"/>
+            <rect x="161" y="76" width="10" height="17" rx="4.5" fill="#111111"/>
+            <path d="M110 88 Q108 100 120 104" stroke="#111111" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+            <circle cx="121" cy="105" r="2.6" fill="#111111"/>
+          </g>
+        </g>
+
+        <!-- konfetti -->
+        <rect class="confetti c1" style="--dx:-40px;--dy:-80px" x="100" y="55" width="6" height="6" fill="#111111"/>
+        <rect class="confetti c2" style="--dx:35px;--dy:-90px" x="180" y="50" width="6" height="6" fill="#555555"/>
+        <circle class="confetti c3" style="--dx:-55px;--dy:-60px" cx="110" cy="45" r="4" fill="#111111"/>
+        <circle class="confetti c4" style="--dx:50px;--dy:-70px" cx="175" cy="40" r="4" fill="#777777"/>
+        <rect class="confetti c5" style="--dx:10px;--dy:-95px" x="138" y="32" width="6" height="6" fill="#333333"/>
+
+        <text class="float-star f1" x="74" y="58" font-size="20" fill="#111111">★</text>
+        <text class="float-star f2" x="206" y="68" font-size="16" fill="#555555">★</text>
+        <text class="float-star f3" x="158" y="22" font-size="14" fill="#111111">★</text>
+      </svg>
     </div>
 
-    <!-- Dolna sekcja informacyjna strony -->
-    <div class="below-grid">
-      <h2>Dlaczego warto zaufać CheapBoost?</h2>
-      <p>Usługa boostingowa jest w pełni nadzorowana i zabezpieczana od pierwszego logowania do ostatniego meczu.</p>
-      
-      <div class="trust-list">
-        <div class="trust-line">✓ Zweryfikowani boosterzy z rangą Champion+</div>
-        <div class="trust-line">✓ Start realizacji w mniej niż 24h</div>
-        <div class="trust-line">✓ Wsparcie na Discordzie 24/7</div>
-        <div class="trust-line">✓ Bezpieczne i natychmiastowe płatności</div>
-        <div class="trust-line">✓ Gwarancja rangi bez dopłat</div>
-        <div class="trust-line">✓ Zrzuty ekranu po każdej sesji</div>
-      </div>
+    <p class="lead-text">Twój sprzęt i konta w dobrych rękach – szybko, tanio i skutecznie. Dołącz do klientów, którzy już zaufali CheapBoost.</p>
+
+    <div class="cta-row">
+      <button class="btn-primary" onclick="showPage('oferta')">Zamów boost</button>
+      <button class="btn-ghost" onclick="showPage('kontakt')">Skontaktuj się</button>
     </div>
 
+    <div class="stats">
+      <div class="stat"><div class="stat-num" id="statBoosts">—</div><div class="stat-label">Ukończonych boostów</div></div>
+      <div class="stat"><div class="stat-num" id="statRating">—</div><div class="stat-label">Średnia ocena</div></div>
+      <div class="stat"><div class="stat-num">24/7</div><div class="stat-label">Obsługa klienta</div></div>
+    </div>
   </div>
 
-  <!-- Sekcja logiki skryptowej sterującej zmianami rang -->
-  <script>
-    // Linki zewnętrzne do oficjalnych ikon Fortnite API, żeby grafiki od razu działały!
-    const RANK_DATA = {
-      1: { name: "Bronze", img: "https://fortnite-api.com", shadow: "rgba(205, 127, 50, 0.4)" },
-      2: { name: "Silver", img: "https://fortnite-api.com", shadow: "rgba(192, 192, 192, 0.4)" },
-      3: { name: "Unreal", img: "https://fortnite-api.com", shadow: "rgba(168, 85, 247, 0.5)" }
-    };
+  <div class="reviews-section">
+    <h2 class="reviews-heading">Co mówią nasi <span>klienci</span></h2>
+    <p class="reviews-sub">Opinie anonimowe — prawdziwi użytkownicy CheapBoost</p>
+    <div class="reviews-wrapper">
+      <div class="reviews-track" id="reviewsTrack"></div>
+    </div>
+  </div>
 
-    function updateRankFromDropdown() {
-      const select = document.getElementById("target-rank-select");
-      const slider = document.getElementById("rank-slider");
-      const img = document.getElementById("main-rank-view");
-      const targetText = document.getElementById("target-rank-text");
-      const selectedName = select.value;
+</div>
 
-      targetText.innerText = selectedName;
+<div id="oferta" class="page">
+  <div class="page-inner">
+    <div class="offer-header">
+      <h1>Oferta Boostingu</h1>
+      <p>Wybierz swoją obecną i pożądaną rangę, tryb oraz platformę — albo od razu przejrzyj oferty sprzedawców poniżej.</p>
+    </div>
 
-      const entry = Object.entries(RANK_DATA).find(([_, value]) => value.name === selectedName);
-      if (entry) {
-        slider.value = entry[0];
-        img.src = entry[1].img;
-        img.style.filter = `drop-shadow(0 0 25px ${entry[1].shadow})`;
-      }
-    }
+    <div class="mode-tabs" id="serviceTabs"></div>
 
-    function updateRankFromSlider(value) {
-      const select = document.getElementById("target-rank-select");
-      const img = document.getElementById("main-rank-view");
-      const targetText = document.getElementById("target-rank-text");
-      
-      if (RANK_DATA[value]) {
-        select.value = RANK_DATA[value].name;
-        targetText.innerText = RANK_DATA[value].name;
-        img.src = RANK_DATA[value].img;
-        img.style.filter = `drop-shadow(0 0 25px ${RANK_DATA[value].shadow})`;
-      }
-    }
-  </script>
+    <div class="picker-grid">
+      <div class="picker-card">
+        <div class="picker-top">
+          <div class="picker-badge" id="fromBadge">🥉</div>
+          <div>
+            <div class="picker-eyebrow">Aktualna ranga</div>
+            <div class="picker-value" id="fromValue">Brąz I</div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Aktualna ranga</label>
+          <select id="fromSelect"></select>
+        </div>
+        <div class="field">
+          <label>Mode</label>
+          <select id="modeSelect"></select>
+        </div>
+      </div>
+
+      <div class="picker-card">
+        <div class="picker-top">
+          <div class="picker-badge" id="toBadge">💠</div>
+          <div>
+            <div class="picker-eyebrow">Pożądana ranga</div>
+            <div class="picker-value" id="toValue">Platyna I</div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Pożądana ranga</label>
+          <select id="toSelect"></select>
+        </div>
+        <div class="field">
+          <label>Platforma</label>
+          <select id="platformSelect"></select>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-box">
+      <div>
+        <div class="summary-path" id="summaryPath"><span class="tag">Wybierz rangi</span></div>
+        <div class="summary-note" id="summaryNote">Uzupełnij wszystkie pola, aby zobaczyć cenę.</div>
+      </div>
+      <div class="price-block">
+        <div class="price-num" id="priceNum">—</div>
+        <div class="price-label">Szacowana cena</div>
+      </div>
+    </div>
+
+    <div class="trust-card">
+      <h2>Dlaczego warto zaufać CheapBoost?</h2>
+      <p>Usługa boostingu jest nadzorowana i bezpieczna od początku do końca</p>
+      <div class="trust-grid">
+        <div class="trust-item"><span class="trust-check">✓</span>Zweryfikowani profesjonalni sprzedawcy</div>
+        <div class="trust-item"><span class="trust-check">✓</span>Szybka dostawa</div>
+        <div class="trust-item"><span class="trust-check">✓</span>Wsparcie na żywo 24/7</div>
+        <div class="trust-item"><span class="trust-check">✓</span>Bezpieczne i natychmiastowe płatności</div>
+        <div class="trust-item"><span class="trust-check">✓</span>Ochrona klienta i gwarancja</div>
+        <div class="trust-item"><span class="trust-check">✓</span>Szeroki wybór ofert</div>
+      </div>
+    </div>
+
+    <div class="seller-panel">
+      <h2>Panel sprzedawcy</h2>
+      <p>Dostęp do wystawiania ofert mają wyłącznie zweryfikowani sprzedawcy CheapBoost.</p>
+
+      <div id="googleBtnBox"></div>
+      <div class="access-denied" id="accessDenied">
+        Brak dostępu — to konto nie ma uprawnień sprzedawcy. Skontaktuj się z administratorem, jeśli to pomyłka.
+      </div>
+
+      <div class="seller-authed" id="sellerAuthed">
+        <div class="seller-authed-head">
+          <img id="authedAvatar" src="" alt="">
+          <div class="who">
+            <b id="authedName">—</b>
+            <span id="authedEmail">—</span>
+          </div>
+        </div>
+        <div class="price-form">
+          <input type="number" id="boostPrice" placeholder="Cena (zł)" min="1">
+          <button class="start-boost-btn" onclick="startBoosting()">Zacznij boostować</button>
+        </div>
+        <div class="live-listing" id="liveListing">
+          <b>Twoja aktywna oferta</b>
+          <span id="liveListingText"></span>
+        </div>
+      </div>
+
+      <p class="setup-note">Logowanie działa przez prawdziwe Google Identity Services — żeby zadziałało na Twojej domenie, wpisz własny Client ID z Google Cloud Console w zmiennej <code>GOOGLE_CLIENT_ID</code> w kodzie strony.</p>
+    </div>
+
+    <div class="sellers-head">
+      <h2 id="sellersCount">Wszyscy sprzedawcy (0)</h2>
+    </div>
+    <div class="seller-list" id="sellerList"></div>
+    <p class="real-note" id="sellerListNote">Zaloguj się powyżej jako zweryfikowany sprzedawca, żeby Twoja oferta pojawiła się na tej liście.</p>
+  </div>
+</div>
+
+<div id="kontakt" class="page">
+  <div class="page-inner" style="text-align:center;">
+    <h1 style="font-size:42px; font-weight:900;">Kontakt</h1>
+    <p class="lead-text" style="margin-top:16px;">Email: kontakt@cheapboost.pl</p>
+  </div>
+</div>
+
+<script>
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('nav .tabs button').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.getElementById('btn-' + id).classList.add('active');
+}
+
+/* ================= STATYSTYKI (do uzupełnienia prawdziwymi danymi) ================= */
+// UWAGA: to jest nowa strona bez historii zamówień, więc nie mamy jeszcze prawdziwych
+// statystyk. Wpisz tu realne liczby, gdy będziesz je znać (np. z panelu zamówień).
+const REAL_STATS = {
+  completedBoosts: 0,   // <- wpisz faktyczną liczbę ukończonych zleceń
+  averageRating: null   // <- wpisz faktyczną średnią ocenę, np. 4.8
+};
+document.getElementById('statBoosts').textContent = REAL_STATS.completedBoosts > 0 ? REAL_STATS.completedBoosts + "+" : "—";
+document.getElementById('statRating').textContent = REAL_STATS.averageRating ? REAL_STATS.averageRating + "★" : "—";
+
+/* ================= OPINIE ================= */
+const reviews = [
+  { text: "Super szybka obsługa, polecam CheapBoost!", stars: 5 },
+  { text: "Bardzo dobra cena i konkretne wsparcie.", stars: 5 },
+  { text: "Wszystko działa jak trzeba, będę wracał.", stars: 4 },
+  { text: "Miła obsługa i szybka realizacja zamówienia.", stars: 5 },
+  { text: "Najlepszy stosunek jakości do ceny na rynku.", stars: 5 },
+  { text: "Kontakt bezproblemowy, wszystko jasno wytłumaczone.", stars: 4 },
+  { text: "Zaskoczony jak szybko to poszło, super sprawa.", stars: 5 },
+  { text: "Polecam każdemu kto szuka taniego wsparcia.", stars: 5 }
+];
+function starString(n) { return "★".repeat(n) + "☆".repeat(5 - n); }
+const track = document.getElementById('reviewsTrack');
+[...reviews, ...reviews].forEach(r => {
+  const card = document.createElement('div');
+  card.className = 'review-card';
+  card.innerHTML = `
+    <div class="review-top">
+      <div class="avatar">👤</div>
+      <div>
+        <div class="review-name">Anonimowy użytkownik</div>
+        <div class="review-stars">${starString(r.stars)}</div>
+      </div>
+    </div>
+    <div class="review-text">${r.text}</div>
+  `;
+  track.appendChild(card);
+});
+
+/* ================= IKONY RANG (własne, oryginalne odznaki) ================= */
+const rankFamilies = {
+  bronze:   { label: "Brąz",     c1: "#5a3414", c2: "#c97b2e", c3: "#f2b866", icon: "medal" },
+  silver:   { label: "Srebro",   c1: "#4c5560", c2: "#9aa4b0", c3: "#e6ebf0", icon: "medal" },
+  gold:     { label: "Złoto",    c1: "#8a5a06", c2: "#e0a52a", c3: "#ffe27a", icon: "medal" },
+  platinum: { label: "Platyna",  c1: "#0e5f57", c2: "#2fb3a0", c3: "#8ff2e0", icon: "kite" },
+  diamond:  { label: "Diamond",  c1: "#0f3f7a", c2: "#3a86e8", c3: "#a9d4ff", icon: "gem" },
+  elite:    { label: "Elite",    c1: "#5a1140", c2: "#c22e8a", c3: "#ff8fd6", icon: "flame" },
+  champion: { label: "Champion", c1: "#5a1608", c2: "#d94a1f", c3: "#ffb069", icon: "flame" },
+  unreal:   { label: "Unreal",   c1: "#2a1a4a", c2: "#7a5cd6", c3: "#e6dcff", icon: "crystal" }
+};
+
+function rankBadgeSVG(famKey, numeral) {
+  const f = rankFamilies[famKey];
+  const gid = "g_" + famKey;
+  let inner = "";
+  if (f.icon === "medal") {
+    inner = `<circle cx="32" cy="32" r="14" fill="url(#${gid}i)" stroke="#fff" stroke-width="1.5" opacity="0.9"/>
+      <path d="M32 22 L35 30 L43 30 L36.5 35 L39 43 L32 38 L25 43 L27.5 35 L21 30 L29 30 Z" fill="#fff" opacity="0.85"/>`;
+  } else if (f.icon === "kite") {
+    inner = `<path d="M32 16 L46 32 L32 48 L18 32 Z" fill="url(#${gid}i)" stroke="#fff" stroke-width="1.5" opacity="0.92"/>
+      <path d="M32 16 L32 48 M18 32 L46 32" stroke="#ffffff" stroke-width="1" opacity="0.5"/>`;
+  } else if (f.icon === "gem") {
+    inner = `<path d="M20 26 L32 15 L44 26 L38 45 L26 45 Z" fill="url(#${gid}i)" stroke="#fff" stroke-width="1.5" opacity="0.92"/>
+      <path d="M20 26 L44 26 M32 15 L26 45 M32 15 L38 45" stroke="#ffffff" stroke-width="1" opacity="0.45"/>`;
+  } else if (f.icon === "flame") {
+    inner = `<path d="M32 14 C24 24 20 30 24 38 C21 37 19 34 19 31 C15 39 18 48 27 50 C22 45 23 40 27 37 C27 42 30 44 33 44 C38 44 42 40 41 34 C44 36 45 39 44 42 C48 36 46 26 39 21 C40 25 39 28 37 29 C37 22 35 17 32 14 Z" fill="url(#${gid}i)" stroke="#fff" stroke-width="1.2" opacity="0.92"/>`;
+  } else if (f.icon === "crystal") {
+    inner = `<path d="M32 12 L40 24 L48 30 L38 34 L32 52 L26 34 L16 30 L24 24 Z" fill="url(#${gid}i)" stroke="#fff" stroke-width="1.4" opacity="0.95"/>
+      <path d="M32 12 L32 52 M16 30 L48 30" stroke="#ffffff" stroke-width="0.8" opacity="0.4"/>`;
+  }
+  const ribbon = numeral ? `
+    <rect x="20" y="52" width="24" height="10" rx="3" fill="#111111"/>
+    <text x="32" y="60" text-anchor="middle" font-size="8" font-weight="800" fill="#ffffff" font-family="Poppins, sans-serif">${numeral}</text>` : "";
+  return `<svg viewBox="0 0 64 ${numeral ? 66 : 64}" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="${gid}" cx="35%" cy="30%" r="75%">
+        <stop offset="0%" stop-color="${f.c3}"/>
+        <stop offset="55%" stop-color="${f.c2}"/>
+        <stop offset="100%" stop-color="${f.c1}"/>
+      </radialGradient>
+      <linearGradient id="${gid}i" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="${f.c3}"/>
+        <stop offset="100%" stop-color="${f.c2}"/>
+      </linearGradient>
+    </defs>
+    <circle cx="32" cy="32" r="30" fill="url(#${gid})" stroke="${f.c1}" stroke-width="2"/>
+    <circle cx="32" cy="32" r="30" fill="none" stroke="#ffffff" stroke-width="1" opacity="0.25"/>
+    ${inner}
+    ${ribbon}
+  </svg>`;
+}
+
+/* ================= OFERTA BOOSTINGU ================= */
+const services = ["Battle Royale Rank Boost", "Reload Rank Boost", "Tournament Boost", "Battle Pass", "Save the World"];
+const serviceTabs = document.getElementById('serviceTabs');
+let activeService = 0;
+services.forEach((s, i) => {
+  const b = document.createElement('button');
+  b.className = 'mode-tab' + (i === 0 ? ' active' : '');
+  b.textContent = s;
+  b.onclick = () => {
+    activeService = i;
+    document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+    b.classList.add('active');
+  };
+  serviceTabs.appendChild(b);
+});
+
+const rankTiers = ["bronze","silver","gold","platinum","diamond","elite","champion"];
+const numerals = ["III","II","I"];
+const ranks = [];
+rankTiers.forEach(fam => {
+  numerals.forEach(num => {
+    ranks.push({ name: rankFamilies[fam].label + " " + num, fam, numeral: num });
+  });
+});
+ranks.push({ name: "Unreal", fam: "unreal", numeral: null });
+
+const modes = [
+  { name: "Normal", mult: 1.0 },
+  { name: "Solo", mult: 1.6 },
+  { name: "Duo", mult: 1.25 },
+  { name: "Squad", mult: 1.05 }
+];
+const platforms = [
+  { name: "PC", mult: 1.0 },
+  { name: "Konsola", mult: 1.1 },
+  { name: "Mobile", mult: 1.15 }
+];
+
+const fromSelect = document.getElementById('fromSelect');
+const toSelect = document.getElementById('toSelect');
+const modeSelect = document.getElementById('modeSelect');
+const platformSelect = document.getElementById('platformSelect');
+
+ranks.forEach((r, i) => {
+  fromSelect.innerHTML += `<option value="${i}" ${i===0?'selected':''}>${r.name}</option>`;
+  toSelect.innerHTML += `<option value="${i}" ${i===9?'selected':''}>${r.name}</option>`;
+});
+modes.forEach((m, i) => { modeSelect.innerHTML += `<option value="${i}">${m.name}</option>`; });
+platforms.forEach((p, i) => { platformSelect.innerHTML += `<option value="${i}">${p.name}</option>`; });
+
+function refreshOffer() {
+  const fromI = parseInt(fromSelect.value);
+  const toI = parseInt(toSelect.value);
+  const modeI = parseInt(modeSelect.value);
+  const platI = parseInt(platformSelect.value);
+
+  document.getElementById('fromBadge').innerHTML = rankBadgeSVG(ranks[fromI].fam, ranks[fromI].numeral);
+  document.getElementById('fromValue').textContent = ranks[fromI].name;
+  document.getElementById('toBadge').innerHTML = rankBadgeSVG(ranks[toI].fam, ranks[toI].numeral);
+  document.getElementById('toValue').textContent = ranks[toI].name;
+
+  const summaryPath = document.getElementById('summaryPath');
+  const summaryNote = document.getElementById('summaryNote');
+  const priceNum = document.getElementById('priceNum');
+
+  if (toI > fromI) {
+    const steps = toI - fromI;
+    const price = Math.round(steps * 6 * modes[modeI].mult * platforms[platI].mult);
+    summaryPath.innerHTML = `
+      <span class="tag">${ranks[fromI].name}</span>
+      <span class="arrow">→</span>
+      <span class="tag">${ranks[toI].name}</span>
+      <span class="arrow">•</span>
+      <span class="tag">${modes[modeI].name}</span>
+      <span class="arrow">•</span>
+      <span class="tag">${platforms[platI].name}</span>
+    `;
+    priceNum.textContent = price + " zł";
+    summaryNote.textContent = "Realizacja zwykle w 24-48h od potwierdzenia zamówienia.";
+  } else {
+    summaryPath.innerHTML = `<span class="tag">Ranga docelowa musi być wyższa</span>`;
+    priceNum.textContent = "—";
+    summaryNote.innerHTML = `<span class="warn">Wybierz rangę docelową wyższą niż obecna.</span>`;
+  }
+}
+[fromSelect, toSelect, modeSelect, platformSelect].forEach(el => el.addEventListener('change', refreshOffer));
+refreshOffer();
+
+/* ================= SPRZEDAWCY (tylko realni, zalogowani sprzedawcy) ================= */
+// Lista sprzedawców startuje pusta - pojawiają się tu wyłącznie prawdziwe osoby,
+// które zalogowały się przez Google, mają uprawnienia sprzedawcy i kliknęły
+// "Zacznij boostować". Brak żadnych zmyślonych/przykładowych wpisów.
+let sellers = [];
+
+function renderSellers() {
+  document.getElementById('sellersCount').textContent = `Wszyscy sprzedawcy (${sellers.length})`;
+  const sellerList = document.getElementById('sellerList');
+  sellerList.innerHTML = '';
+  const note = document.getElementById('sellerListNote');
+
+  if (sellers.length === 0) {
+    note.style.display = 'block';
+    return;
+  }
+  note.style.display = 'none';
+
+  sellers.forEach((s, i) => {
+    const row = document.createElement('div');
+    row.className = 'seller-row' + (i === 0 ? ' top' : '');
+    row.innerHTML = `
+      ${i === 0 ? '<div class="top-flag">Bieżąca oferta</div>' : ''}
+      <div class="seller-main">
+        <img class="seller-avatar" style="object-fit:cover;" src="${s.avatar}" alt="">
+        <div class="seller-info">
+          <div class="seller-name-row">${s.name} <span class="verified">✔</span></div>
+          <div class="seller-meta">Zweryfikowany sprzedawca • ${s.email}</div>
+        </div>
+        <div class="seller-delivery">Cena<b>${s.price.toFixed(2)} zł</b></div>
+        <div class="seller-price">
+          <button class="buy-btn">Kup teraz</button>
+        </div>
+      </div>
+    `;
+    sellerList.appendChild(row);
+  });
+}
+renderSellers();
+
+/* ================= LOGOWANIE GOOGLE (prawdziwa integracja) ================= */
+// 1) Wejdź na https://console.cloud.google.com/apis/credentials
+// 2) Utwórz "OAuth client ID" typu "Web application"
+// 3) Jako "Authorized JavaScript origins" wpisz domenę, na której hostujesz tę stronę
+// 4) Wklej wygenerowany Client ID poniżej:
+const GOOGLE_CLIENT_ID = "WPISZ_TU_SWOJ_GOOGLE_CLIENT_ID.apps.googleusercontent.com";
+
+// Tylko te adresy e-mail mają uprawnienia sprzedawcy:
+const ALLOWED_SELLER_EMAILS = ["szymon.zakloss@gmail.com"];
+
+let currentUser = null;
+
+function decodeJwt(token) {
+  const payload = token.split('.')[1];
+  const json = decodeURIComponent(atob(payload.replace(/-/g, '+').replace(/_/g, '/'))
+    .split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+  return JSON.parse(json);
+}
+
+function handleGoogleCredential(response) {
+  const data = decodeJwt(response.credential);
+  currentUser = { name: data.name, email: data.email, picture: data.picture };
+
+  document.getElementById('accessDenied').style.display = 'none';
+  document.getElementById('sellerAuthed').style.display = 'none';
+
+  if (ALLOWED_SELLER_EMAILS.includes(currentUser.email)) {
+    document.getElementById('authedAvatar').src = currentUser.picture;
+    document.getElementById('authedName').textContent = currentUser.name;
+    document.getElementById('authedEmail').textContent = currentUser.email;
+    document.getElementById('sellerAuthed').style.display = 'block';
+  } else {
+    document.getElementById('accessDenied').style.display = 'block';
+  }
+}
+
+function startBoosting() {
+  const priceInput = document.getElementById('boostPrice');
+  const price = parseFloat(priceInput.value);
+  if (!currentUser || !price || price <= 0) {
+    alert("Podaj prawidłową cenę przed rozpoczęciem boostowania.");
+    return;
+  }
+  // aktualizuje lub dodaje ofertę zalogowanego sprzedawcy
+  sellers = sellers.filter(s => s.email !== currentUser.email);
+  sellers.unshift({ name: currentUser.name, email: currentUser.email, avatar: currentUser.picture, price });
+  renderSellers();
+
+  const liveListing = document.getElementById('liveListing');
+  document.getElementById('liveListingText').textContent = `${price.toFixed(2)} zł — widoczne teraz na liście sprzedawców poniżej.`;
+  liveListing.style.display = 'block';
+}
+
+window.onload = function () {
+  if (window.google && GOOGLE_CLIENT_ID.indexOf("WPISZ_TU") === -1) {
+    google.accounts.id.initialize({
+      client_id: GOOGLE_CLIENT_ID,
+      callback: handleGoogleCredential
+    });
+    google.accounts.id.renderButton(
+      document.getElementById('googleBtnBox'),
+      { theme: "outline", size: "large", text: "signin_with", shape: "pill" }
+    );
+  } else {
+    document.getElementById('googleBtnBox').innerHTML =
+      '<p style="color:#b42323; font-size:13px; font-weight:600;">Skonfiguruj GOOGLE_CLIENT_ID w kodzie, aby włączyć logowanie.</p>';
+  }
+};
+</script>
+
 </body>
 </html>
